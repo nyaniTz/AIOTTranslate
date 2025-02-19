@@ -1,0 +1,102 @@
+.sidebar{
+    width: 300px;
+    border-right: 1.5px solid var(--border-fade);
+    height: calc(100vh - 65px);
+    display: grid;
+    float: left;
+    overflow: hidden;
+    grid-gap: 20px;
+    padding: 20px;
+    justify-items: center;
+    align-items: start;
+    grid-template-rows: auto auto 1fr;
+
+    position: fixed;
+    top: 65px;
+    overflow: scroll;
+    padding-bottom: 100px;
+    left: 0px;
+    z-index: 1;
+    background: white;
+
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+
+.sidebar-menu{
+    display: grid;
+    grid-gap: 13px;
+    width: 100%;
+}
+
+.sidebar-link {
+    box-shadow: rgba(0, 0, 0, 0.06) 0px 10px 36px 0px, rgba(0, 0, 0,0.06) 0px 0px 0px 1px;
+    padding: 12px;
+    color: var(--accent);
+    font-weight: 400;
+    font-size: 0.9em;
+    border-radius: 5px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-gap: 13px;
+    text-decoration: none;
+}
+
+.sidebar-link img {
+    height: 20px;
+    filter: invert(17%) sepia(35%) saturate(2414%) hue-rotate(308deg) brightness(96%) contrast(96%);
+}
+
+.sidebar-link:hover, .sidebar-link.active{
+    color: white;
+    background: var(--accent);
+    transition: 0.3s all;
+    font-weight: 600;
+}
+
+.sidebar-link:hover img, .sidebar-link.active img {
+  filter: invert(100%);
+}
+
+.ad-link {
+    background: linear-gradient(90deg, #ff2352, #f6186a, #e71383);
+    color: white;
+    width: 100%;
+    border-radius: 10px;
+    display: grid;
+    padding: 13px;
+    grid-gap: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    justify-self: center;
+    margin-bottom: 10px;
+    align-items: center;
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+
+    -moz-user-select: none;
+    user-select: none;
+    -o-user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .ad-link > p{
+    z-index: 1;
+  }
+
+  .ad-link img {
+    filter: invert(100%);
+    position: absolute;
+    height: 50px;
+    top: -10px;
+    left: -10px;
+    z-index: 0;
+    opacity: 0.2;
+  }
+
+  .bg-blue{
+    background: linear-gradient(90deg, #3e79ee, #749cec, rgba(165,190,238,1));
+  }
