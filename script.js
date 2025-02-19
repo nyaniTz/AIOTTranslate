@@ -236,7 +236,7 @@ function updateHiddenText() {
 
 function checkHiddenText() {
     if (hiddenText.value.trim() === "") {
-        downloadBtn.style.opacity = '0'; // Hide the button
+        downloadBtn.style.opacity = '0'; // Hide the buttons
     } else {
         downloadBtn.style.opacity = '1'; // Show the button
     }
