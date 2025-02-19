@@ -97,104 +97,26 @@ async function translateText(text, targetLang) {
 
 
 // 🎤 Speak Out the Translated Text (Text-to-Speech)
-// Create a server-side proxy to handle CORS
-const express = require('express');
-const app = express();
-
-// Set up the server
-const port = 8080;
-app.listen(port, () => {
-  console.log(`Server started on port ${port}`);
-});
-
-// Set up a proxy to the responsive voice API
-app.all('/speak', (req, res) => {
-  const speechText = req.body.text;
-  const voice = req.body.voice;
-  const rate = req.body.rate;
-  console.log(`Speech request received: ${speechText}, Voice: ${voice}, Rate: ${rate}`);
-  
-  // Make a request to the responsive voice API
-  const url = `https://api.responsivevoice.com/cgi-bin/narrate.cgi?key=RwUUyZRp&text=${speechText}&voice=${voice}&rate=${rate}`;
-  const options = {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  };
-
-  // Use the axios library to make the request
-  const axios = require('axios');
-  axios.get(url, options)
-    .then(response => {
-      console.log(`Speech response received: ${response.data}`);
-      res.status(200).send(response.data);
-    })
-    .catch(error => {
-      console.error(`Error: ${error}`);
-      res.status(500).send('Error generating speech');
-    });
-});
-
-// Set up an endpoint to receive the speech request
-app.post('/speakText', (req, res) => {
-  const text = req.body.text;
-  const targetLang = req.body.targetLang;
-
-  // Workaround: Add a space before any '0' characters
-  text = text.replace(/0/g, ' 0');
-
-  // Determine the voice based on the target language
-  let voice;
-  if (targetLang === 'tr') {
-    voice = 'US English Male';
-  } else {
-    voice = 'Turkish Male';
-  }
-
-  // Make a request to the proxy to generate the speech
-  const url = 'https://nyanitz.github.io/AIOTTranslate/';
-  const data = {
-    text,
-    voice,
-    rate: 1
-  };
-
-  // Use the axios library to make the request
-  const axios = require('axios');
-  axios.post(url, data)
-    .then(response => {
-      console.log(`Speech response received: ${response.data}`);
-      res.status(200).send(response.data);
-    })
-    .catch(error => {
-      console.error(`Error: ${error}`);
-      res.status(500).send('Error generating speech');
-    });
-});
-
-// Client-side code
 function speakText(text, targetLang) {
-  const speechUrl = 'https://nyanitz.github.io/AIOTTranslate/';
-  const data = {
-    text,
-    targetLang
-  };
+    // Workaround: Add a space before any '0' characters
+    text = text.replace(/0/g, ' 0');
 
-  // Use the fetch API to make the request
-  fetch(speechUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(response => {
-    return response.text();
-  })
-  .then(text => {
-    // The speech has been generated, but it's not being played
-    console.log(`Speech text: ${text}`);
-  })
-  .catch(error => {
-    console.error(`Error: ${error}`);
-  });
+    if (typeof responsiveVoice !== 'undefined') {
+        let voice;
+        if (targetLang === 'tr') {
+            voice = 'UK English Male'; // OR whatever English voice you prefer
+            
+       console.log("Tr")
+        } else {
+            voice = 'Turkish Male'; //  OR "Turkish Male" - Check console output!
+           
+            console.log("EN")
+        }
+
+        responsiveVoice.speak(text, voice, { rate: 1 });
+    } else {
+        console.warn("ResponsiveVoice not loaded.");
+    }
 }
 
 // Start Recording
