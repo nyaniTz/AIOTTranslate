@@ -103,7 +103,7 @@ async function translateText(text, targetLang) {
 
 //     if (typeof responsiveVoice !== 'undefined') {
 //         let voice;
-//         if (targetLang === 'tr') {
+//         if (targetLang === 'en') {
 //             voice = 'UK English Male'; // OR whatever English voice you prefer
             
 //        console.log("Tr")
@@ -119,42 +119,100 @@ async function translateText(text, targetLang) {
 //     }
 // }
 
+// function speakText(text, targetLang) {
+//   // Workaround: Add a space before any '0' characters
+//   text = text.replace(/0/g, ' 0');
+
+//   if ('speechSynthesis' in window) {
+//       let voiceURI = null;
+//       let language = null;
+
+//       if (targetLang === 'en') {
+//           language = 'en-GB'; // Or another English language code
+//           console.log("TR - Using EN voice (as no built-in Turkish)");
+//       } else {
+//           language = 'tr-TR'; // Turkish language code
+//           console.log("EN - Using Turkish voice");
+//       }
+
+//       const utterance = new SpeechSynthesisUtterance(text);
+//       utterance.lang = language;
+
+//       //  Find a matching voice if possible (optional, but recommended).  Iterate through the voices
+//       //  available in the browser.  If a voice with the language is found,  use it to synthesize
+//       speechSynthesis.getVoices().forEach((voice) => {
+//           if (voice.lang === language) {
+//               utterance.voice = voice;
+//               console.log("Using voice: " + voice.name);
+//               //console.log(voice); //Uncomment to see voice details
+//           }
+//       });
+
+
+
+//       speechSynthesis.speak(utterance);
+
+
+//   } else {
+//       console.warn("SpeechSynthesis not supported in this browser.");
+//   }
+// }
+
 function speakText(text, targetLang) {
   // Workaround: Add a space before any '0' characters
   text = text.replace(/0/g, ' 0');
 
-  if ('speechSynthesis' in window) {
-      let voiceURI = null;
+  const isEdgeOrMac = (() => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return userAgent.includes('edge') || userAgent.includes('mac');
+  })();
+
+
+  if (isEdgeOrMac && 'speechSynthesis' in window) {
+      // Use browser voice (SpeechSynthesis API)
+
       let language = null;
 
-      if (targetLang === 'tr') {
-          language = 'en-GB'; // Or another English language code
-          console.log("TR - Using EN voice (as no built-in Turkish)");
+      if (targetLang === 'en') {
+          language = 'en-GB'; //  Or another English language code
+          console.log("Using EN voice (as no built-in Turkish)");
       } else {
           language = 'tr-TR'; // Turkish language code
-          console.log("EN - Using Turkish voice");
+          console.log("Using Turkish voice");
       }
+
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = language;
 
-      //  Find a matching voice if possible (optional, but recommended).  Iterate through the voices
-      //  available in the browser.  If a voice with the language is found,  use it to synthesize
       speechSynthesis.getVoices().forEach((voice) => {
           if (voice.lang === language) {
               utterance.voice = voice;
               console.log("Using voice: " + voice.name);
-              //console.log(voice); //Uncomment to see voice details
+
           }
       });
-
-
 
       speechSynthesis.speak(utterance);
 
 
+
+  } else if (typeof responsiveVoice !== 'undefined') {
+      // Use ResponsiveVoice
+
+      let voice;
+      if (targetLang === 'en') {
+          voice = 'UK English Male'; // OR whatever English voice you prefer
+          console.log("Using ResponsiveVoice with English voice");
+      } else {
+          voice = 'Turkish Male';
+          console.log("Using ResponsiveVoice with Turkish voice");
+      }
+
+      responsiveVoice.speak(text, voice, { rate: 1 });
+
   } else {
-      console.warn("SpeechSynthesis not supported in this browser.");
+      console.warn("Browser SpeechSynthesis and ResponsiveVoice not supported or loaded.");
   }
 }
 
