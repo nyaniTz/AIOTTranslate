@@ -97,26 +97,65 @@ async function translateText(text, targetLang) {
 
 
 // 🎤 Speak Out the Translated Text (Text-to-Speech)
-function speakText(text, targetLang) {
-    // Workaround: Add a space before any '0' characters
-    text = text.replace(/0/g, ' 0');
+// function speakText(text, targetLang) {
+//     // Workaround: Add a space before any '0' characters
+//     text = text.replace(/0/g, ' 0');
 
-    if (typeof responsiveVoice !== 'undefined') {
-        let voice;
-        if (targetLang === 'tr') {
-            voice = 'UK English Male'; // OR whatever English voice you prefer
+//     if (typeof responsiveVoice !== 'undefined') {
+//         let voice;
+//         if (targetLang === 'tr') {
+//             voice = 'UK English Male'; // OR whatever English voice you prefer
             
-       console.log("Tr")
-        } else {
-            voice = 'Turkish Male'; //  OR "Turkish Male" - Check console output!
+//        console.log("Tr")
+//         } else {
+//             voice = 'Turkish Male'; //  OR "Turkish Male" - Check console output!
            
-            console.log("EN")
-        }
+//             console.log("EN")
+//         }
 
-        responsiveVoice.speak(text, voice, { rate: 1 });
-    } else {
-        console.warn("ResponsiveVoice not loaded.");
-    }
+//         responsiveVoice.speak(text, voice, { rate: 1 });
+//     } else {
+//         console.warn("ResponsiveVoice not loaded.");
+//     }
+// }
+
+function speakText(text, targetLang) {
+  // Workaround: Add a space before any '0' characters
+  text = text.replace(/0/g, ' 0');
+
+  if ('speechSynthesis' in window) {
+      let voiceURI = null;
+      let language = null;
+
+      if (targetLang === 'tr') {
+          language = 'en-GB'; // Or another English language code
+          console.log("TR - Using EN voice (as no built-in Turkish)");
+      } else {
+          language = 'tr-TR'; // Turkish language code
+          console.log("EN - Using Turkish voice");
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language;
+
+      //  Find a matching voice if possible (optional, but recommended).  Iterate through the voices
+      //  available in the browser.  If a voice with the language is found,  use it to synthesize
+      speechSynthesis.getVoices().forEach((voice) => {
+          if (voice.lang === language) {
+              utterance.voice = voice;
+              console.log("Using voice: " + voice.name);
+              //console.log(voice); //Uncomment to see voice details
+          }
+      });
+
+
+
+      speechSynthesis.speak(utterance);
+
+
+  } else {
+      console.warn("SpeechSynthesis not supported in this browser.");
+  }
 }
 
 // Start Recording
