@@ -37,6 +37,14 @@ function getVoiceForLanguage(lang) {
     });
 }
 
+// if(stopRecordButton.opacity='0'){
+//   stopRecordButton.textContent=''
+// }
+// if(startRecordButton.opacity='0'){
+
+//   startRecordButton.textContent=''
+// }
+
 // Toggle Languages
 toggleLanguageButton.addEventListener('click', () => {
     // Stop any ongoing recording
@@ -55,11 +63,11 @@ toggleLanguageButton.addEventListener('click', () => {
     if (currentLanguage === 'en-US') {
         currentLanguage = 'tr-TR';
         targetLanguage = 'en';
-        toggleText.innerHTML = 'Turkish ➜ English';
+        toggleText.innerHTML = 'Turkish <i class="fa-solid fa-rotate"></i> English';
     } else {
         currentLanguage = 'en-US';
         targetLanguage = 'tr';
-        toggleText.innerHTML = 'English ➜ Turkish';
+        toggleText.innerHTML = 'English <i class="fa-solid fa-rotate"></i> Turkish';
     }
     console.log('Switched to:', currentLanguage, 'Translating to:', targetLanguage);
 });
