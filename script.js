@@ -162,59 +162,40 @@ function speakText(text, targetLang) {
   // Workaround: Add a space before any '0' characters
   text = text.replace(/0/g, ' 0');
 
-  const isEdgeOrMac = (() => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      return userAgent.includes('edge') || userAgent.includes('mac');
-  })();
+  const isEdge = /Edg/.test(navigator.userAgent);
+  const isMac = /Macintosh|Mac OS X/.test(navigator.userAgent);
 
+  if (isEdge || isMac) {
+      console.log("Using Browser's Built-in Voice (Edge/Mac)");
+      if ('speechSynthesis' in window) {
+          let language = targetLang === 'en' ? 'en-GB' : 'tr-TR';
 
-  if (isEdgeOrMac && 'speechSynthesis' in window) {
-      // Use browser voice (SpeechSynthesis API)
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = language;
 
-      let language = null;
-
-      if (targetLang === 'en') {
-          language = 'en-GB'; //  Or another English language code
-          console.log("Using EN voice (as no built-in Turkish)");
-      } else {
-          language = 'tr-TR'; // Turkish language code
-          console.log("Using Turkish voice");
-      }
-
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language;
-
-      speechSynthesis.getVoices().forEach((voice) => {
-          if (voice.lang === language) {
-              utterance.voice = voice;
-              console.log("Using voice: " + voice.name);
-
+          // Find a matching voice if available
+          let voices = speechSynthesis.getVoices();
+          let selectedVoice = voices.find(voice => voice.lang === language);
+          if (selectedVoice) {
+              utterance.voice = selectedVoice;
+              console.log("Using voice: " + selectedVoice.name);
           }
-      });
 
-      speechSynthesis.speak(utterance);
-
-
-
-  } else if (typeof responsiveVoice !== 'undefined') {
-      // Use ResponsiveVoice
-
-      let voice;
-      if (targetLang === 'en') {
-          voice = 'UK English Male'; // OR whatever English voice you prefer
-          console.log("Using ResponsiveVoice with English voice");
+          speechSynthesis.speak(utterance);
       } else {
-          voice = 'Turkish Male';
-          console.log("Using ResponsiveVoice with Turkish voice");
+          console.warn("SpeechSynthesis not supported in this browser.");
       }
+  } else if (typeof responsiveVoice !== 'undefined') {
+      console.log("Using ResponsiveVoice.js");
+
+      let voice = targetLang === 'en' ? 'UK English Male' : 'Turkish Male';
 
       responsiveVoice.speak(text, voice, { rate: 1 });
-
   } else {
-      console.warn("Browser SpeechSynthesis and ResponsiveVoice not supported or loaded.");
+      console.warn("No supported TTS method found.");
   }
 }
+
 
 // Start Recording
 let lastFinalTranscript = ''; // Store the last complete sentence
