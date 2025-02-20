@@ -1,32 +1,76 @@
 // script.js
 // Ensure no duplicate declarations
+
 let toggleLanguageButton = document.getElementById('toggleLanguage');
 let toggleText = document.getElementById('toggleText');
 let startRecordButton = document.getElementById('startRecord');
 let stopRecordButton = document.getElementById('stopRecord');
 let transcriptTextbox = document.getElementById('transcript');
 let translationDiv = document.getElementById('translation');
+let downloadBtn    = document.getElementById('downloadBtn')
 
 let currentLanguage = 'en-US'; // Default to English
 let targetLanguage = 'tr'; // Default to translate to Turkish
 let recognition;
 let isListening = false;
 
+// Function to check if a language is supported and get a voice
+function getVoiceForLanguage(lang) {
+    return new Promise((resolve) => {
+        speechSynthesis.onvoiceschanged = () => {
+            const voices = speechSynthesis.getVoices();
+            let voice = voices.find(v => v.lang === lang);  // Exact match
 
-// Toggle Language
+            if (!voice) {
+              // Fallback if no exact match
+                voice = voices.find(v => v.lang.startsWith(lang.split('-')[0])); // Check language code only
+            }
+
+
+            resolve(voice);
+        };
+
+        // Trigger voiceschanged if it hasn't already fired
+        if (speechSynthesis.getVoices().length > 0) {
+            speechSynthesis.onvoiceschanged();
+        }
+    });
+}
+
+// if(stopRecordButton.opacity='0'){
+//   stopRecordButton.textContent=''
+// }
+// if(startRecordButton.opacity='0'){
+
+//   startRecordButton.textContent=''
+// }
+
+// Toggle Languages
 toggleLanguageButton.addEventListener('click', () => {
+    // Stop any ongoing recording
+    stopListening();  // Call your existing stopListening function
+
+    // Reset UI
+    startRecordButton.disabled = false;
+    startRecordButton.style.opacity = '1';
+    
+    stopRecordButton.disabled = true;
+    stopRecordButton.style.opacity = '0';
+    transcriptTextbox.value = ""; // Clear the transcript
+    translationDiv.textContent = ""; // Clear the translation
+
+    // Toggle languages
     if (currentLanguage === 'en-US') {
         currentLanguage = 'tr-TR';
         targetLanguage = 'en';
-        toggleText.innerHTML = 'Turkish ➜ English';
+        toggleText.innerHTML = 'Turkish <i class="fa-solid fa-rotate"></i> English';
     } else {
         currentLanguage = 'en-US';
         targetLanguage = 'tr';
-        toggleText.innerHTML = 'English ➜ Turkish';
+        toggleText.innerHTML = 'English <i class="fa-solid fa-rotate"></i> Turkish';
     }
     console.log('Switched to:', currentLanguage, 'Translating to:', targetLanguage);
 });
-
 
 // Stop Recording
 function stopListening() {
@@ -42,12 +86,11 @@ function stopListening() {
 }
 
 // Translate Text (Placeholder - Replace with actual translation logic)
-// Translate Text using LibreTranslate API
 // Translate Text using Google Translate unofficial API
 async function translateText(text, targetLang) {
     const sourceLang = currentLanguage.split('-')[0]; // Get the source language from currentLanguage
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-    
+
     try {
         const response = await fetch(url);
         const result = await response.json();
@@ -60,19 +103,111 @@ async function translateText(text, targetLang) {
 
 
 
-// Speak Out the Translated Text
-function speakText(text, langCode) {
-    if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langCode;
-        window.speechSynthesis.speak(utterance);
-    } else {
-        console.warn("Speech synthesis not supported.");
-    }
+
+// 🎤 Speak Out the Translated Text (Text-to-Speech)
+// function speakText(text, targetLang) {
+//     // Workaround: Add a space before any '0' characters
+//     text = text.replace(/0/g, ' 0');
+
+//     if (typeof responsiveVoice !== 'undefined') {
+//         let voice;
+//         if (targetLang === 'en') {
+//             voice = 'UK English Male'; // OR whatever English voice you prefer
+            
+//        console.log("Tr")
+//         } else {
+//             voice = 'Turkish Male'; //  OR "Turkish Male" - Check console output!
+           
+//             console.log("EN")
+//         }
+
+//         responsiveVoice.speak(text, voice, { rate: 1 });
+//     } else {
+//         console.warn("ResponsiveVoice not loaded.");
+//     }
+// }
+
+// function speakText(text, targetLang) {
+//   // Workaround: Add a space before any '0' characters
+//   text = text.replace(/0/g, ' 0');
+
+//   if ('speechSynthesis' in window) {
+//       let voiceURI = null;
+//       let language = null;
+
+//       if (targetLang === 'en') {
+//           language = 'en-GB'; // Or another English language code
+//           console.log("TR - Using EN voice (as no built-in Turkish)");
+//       } else {
+//           language = 'tr-TR'; // Turkish language code
+//           console.log("EN - Using Turkish voice");
+//       }
+
+//       const utterance = new SpeechSynthesisUtterance(text);
+//       utterance.lang = language;
+
+//       //  Find a matching voice if possible (optional, but recommended).  Iterate through the voices
+//       //  available in the browser.  If a voice with the language is found,  use it to synthesize
+//       speechSynthesis.getVoices().forEach((voice) => {
+//           if (voice.lang === language) {
+//               utterance.voice = voice;
+//               console.log("Using voice: " + voice.name);
+//               //console.log(voice); //Uncomment to see voice details
+//           }
+//       });
+
+
+
+//       speechSynthesis.speak(utterance);
+
+
+//   } else {
+//       console.warn("SpeechSynthesis not supported in this browser.");
+//   }
+// }
+
+function speakText(text, targetLang) {
+  // Workaround: Add a space before any '0' characters
+  text = text.replace(/0/g, ' 0');
+
+  const isEdge = /Edg/.test(navigator.userAgent);
+  const isMac = /Macintosh|Mac OS X/.test(navigator.userAgent);
+
+  if (isEdge || isMac) {
+      console.log("Using Browser's Built-in Voice (Edge/Mac)");
+      if ('speechSynthesis' in window) {
+          let language = targetLang === 'en' ? 'en-GB' : 'tr-TR';
+
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = language;
+
+          // Find a matching voice if available
+          let voices = speechSynthesis.getVoices();
+          let selectedVoice = voices.find(voice => voice.lang === language);
+          if (selectedVoice) {
+              utterance.voice = selectedVoice;
+              console.log("Using voice: " + selectedVoice.name);
+          }
+
+          speechSynthesis.speak(utterance);
+      } else {
+          console.warn("SpeechSynthesis not supported in this browser.");
+      }
+  } else if (typeof responsiveVoice !== 'undefined') {
+      console.log("Using ResponsiveVoice.js");
+
+      let voice = targetLang === 'en' ? 'UK English Male' : 'Turkish Male';
+
+      responsiveVoice.speak(text, voice, { rate: 1 });
+  } else {
+      console.warn("No supported TTS method found.");
+  }
 }
 
 
 // Start Recording
+let lastFinalTranscript = ''; // Store the last complete sentence
+
 function startRecording() {
     if (!('webkitSpeechRecognition' in window)) {
         alert("Speech recognition not supported in this browser. Try Chrome.");
@@ -82,7 +217,7 @@ function startRecording() {
     recognition = new webkitSpeechRecognition();
     recognition.lang = currentLanguage;
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;  // Enable interim results for live updates
     recognition.maxAlternatives = 1;
 
     isListening = true;
@@ -97,16 +232,31 @@ function startRecording() {
     };
 
     recognition.onresult = async (event) => {
-        const result = event.results[event.results.length - 1][0].transcript;
-        console.log('Transcript:', result);
-        transcriptTextbox.value = result;
+        let interimTranscript = '';
+        let finalTranscript = '';
 
-        // Translate to the target language
-        const translatedText = await translateText(result, targetLanguage);
-        translationDiv.innerHTML = translatedText;
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const result = event.results[i];
+            if (result.isFinal) {
+                finalTranscript += result[0].transcript;
+                lastFinalTranscript = finalTranscript; // Save the last complete sentence
+            } else {
+                interimTranscript += result[0].transcript;
+            }
+        }
 
-        // Speak Out the Translated Text
-        speakText(translatedText, targetLanguage === 'tr' ? 'tr-TR' : 'en-US');
+        // Update first box with live transcription
+        transcriptTextbox.value = interimTranscript + finalTranscript; // Append final transcript to live
+
+        // If user stopped talking (no interim results), update the second box
+        if (!interimTranscript) {
+            if (lastFinalTranscript) {
+                const translatedText = await translateText(lastFinalTranscript, targetLanguage);
+                translationDiv.textContent = translatedText; // Use textContent for safety
+                speakText(translatedText, targetLanguage === 'tr' ? 'tr-TR' : 'en-US');
+                lastFinalTranscript = ''; // Reset for the next round
+            }
+        }
     };
 
     recognition.onerror = (event) => {
@@ -120,13 +270,71 @@ function startRecording() {
     recognition.onend = () => {
         console.log('Speech recognition ended.');
         if (isListening) {
-            recognition.start(); // Restart if manually stopped
+            // recognition.start(); // Restart if manually stopped.  Commented this to prevent continuous restart.
+            startRecordButton.disabled = false;  // Enable the start button
+            stopRecordButton.disabled = true; // Disable stop button
+            startRecordButton.style.opacity = '1';
+            stopRecordButton.style.opacity = '0';
         }
     };
 
     recognition.start();
 }
 
+
+function updateHiddenText() {
+    const translationDiv = document.getElementById("translation");
+    const hiddenText = document.getElementById("hiddenText");
+
+    // Append new translation while keeping previous text
+    if (translationDiv.textContent.trim()) {
+      hiddenText.value += translationDiv.textContent.trim() + " "; // Add a space to separate sentences
+    }
+  }
+
+  // Observe changes in the translation div and update hidden text
+  const observer = new MutationObserver(updateHiddenText);
+  observer.observe(document.getElementById("translation"), { childList: true, subtree: true, characterData: true });
+
+  // Download Button Function
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    const text = document.getElementById("hiddenText").value.trim();
+    if (!text) {
+      alert("No translated text to download!");
+      return;
+    }
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "AIandAIOT_translated_text.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+
+
+  const hiddenText = document.getElementById('hiddenText');
+
+
+function checkHiddenText() {
+    if (hiddenText.value.trim() === "") {
+        downloadBtn.style.opacity = '0'; // Hide the buttons
+    } else {
+        downloadBtn.style.opacity = '1'; // Show the button
+    }
+}
+
+// Instead of MutationObserver, use a periodic check (because textarea.value changes are not observed)
+setInterval(checkHiddenText, 500); // Check every 500ms
+
+// Also trigger once on page load
+checkHiddenText();
+
+  
 // Event listeners for buttons
 startRecordButton.addEventListener('click', startRecording);
-stopRecordButton.addEventListener('click', stopListening); // Add this to your script
+stopRecordButton.addEventListener('click', stopListening);
