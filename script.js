@@ -7,7 +7,7 @@ let stopRecordButton = document.getElementById("stopRecord");
 let transcriptTextbox = document.getElementById("transcript");
 let translationDiv = document.getElementById("translation");
 let downloadBtn = document.getElementById("downloadBtn");
-
+let listeningBars=document.getElementById('listeningBars')
 let currentLanguage = "en-US"; // Default to English
 let targetLanguage = "tr"; // Default translation target
 let recognition;
@@ -49,6 +49,7 @@ function stopListening() {
     stopRecordButton.style.display = "none";
     startRecordButton.style.display = "block";
     transcriptTextbox.value=""
+    listeningBars.style.display='none'
    
     console.log("Speech recognition stopped.");
   }
@@ -109,6 +110,8 @@ function startRecording() {
     return;
   }
 
+ 
+  
 
 
   recognition = new webkitSpeechRecognition();
@@ -121,11 +124,24 @@ function startRecording() {
 
   recognition.onstart = () => {
     console.log("Speech recognition started in:", currentLanguage);
-    transcriptTextbox.value = "Listening...";
+    // transcriptTextbox.value = "Listening...";
+   
+    
+    // setTimeout(() => {
+    //     transcriptTextbox.value = "Listening...";
+    //     setTimeout(() => {
+    //         transcriptTextbox.value = ""; // Clears after 2 seconds
+    //     }, 2000); // Keeps "Listening..." for 2 seconds
+    // }, 100);
+    
+
+
+
     startRecordButton.disabled = true;
     stopRecordButton.disabled = false;
      startRecordButton.style.display = "none";
     stopRecordButton.style.display = "block";
+    listeningBars.style.display='flex'
   };
 
   recognition.onresult = async (event) => {
@@ -169,6 +185,7 @@ function startRecording() {
   };
 
   recognition.start();
+ 
 }
 
 // Observe Changes and Update Hidden Text
