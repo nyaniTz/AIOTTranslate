@@ -19,9 +19,10 @@ toggleLanguageButton.addEventListener("click", () => {
 
   // Reset UI
   startRecordButton.disabled = false;
-  startRecordButton.style.opacity = "1";
+
+  startRecordButton.style.display = "block";
   stopRecordButton.disabled = true;
-  stopRecordButton.style.opacity = "0";
+  stopRecordButton.style.display = "none";
   transcriptTextbox.value = ""; // Clear transcript
   translationDiv.textContent = ""; // Clear translation
 
@@ -45,8 +46,10 @@ function stopListening() {
     isListening = false;
     startRecordButton.disabled = false;
     stopRecordButton.disabled = true;
-    startRecordButton.style.opacity = "1";
-    stopRecordButton.style.opacity = "0";
+    stopRecordButton.style.display = "none";
+    startRecordButton.style.display = "block";
+    transcriptTextbox.value=""
+   
     console.log("Speech recognition stopped.");
   }
 }
@@ -106,6 +109,8 @@ function startRecording() {
     return;
   }
 
+
+
   recognition = new webkitSpeechRecognition();
   recognition.lang = currentLanguage; // Set language dynamically
   recognition.continuous = true;
@@ -119,8 +124,8 @@ function startRecording() {
     transcriptTextbox.value = "Listening...";
     startRecordButton.disabled = true;
     stopRecordButton.disabled = false;
-    startRecordButton.style.opacity = "0";
-    stopRecordButton.style.opacity = "1";
+     startRecordButton.style.display = "none";
+    stopRecordButton.style.display = "block";
   };
 
   recognition.onresult = async (event) => {
@@ -158,8 +163,8 @@ function startRecording() {
     if (isListening) {
       startRecordButton.disabled = false;
       stopRecordButton.disabled = true;
-      startRecordButton.style.opacity = "1";
-      stopRecordButton.style.opacity = "0";
+       startRecordButton.style.display = "block";
+      stopRecordButton.style.display = "none";
     }
   };
 
